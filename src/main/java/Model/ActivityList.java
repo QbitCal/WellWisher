@@ -1,12 +1,5 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package Model;
-import WellWisher.*;
-import com.google.gson.GsonBuilder;
-import com.google.gson.typeadapters.RuntimeTypeAdapterFactory;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -74,6 +67,10 @@ public class ActivityList {
         } catch (ClassNotFoundException ex) {
             System.out.println("ERROR: ClassNotFoundException has occurred.");
         }
+        for (Activity act : activityList) {
+            System.out.println(act);
+        }
+        
     }
 
     private void createTestActivities() {
@@ -96,7 +93,9 @@ public class ActivityList {
         System.out.println("Created Default Social Activities.");
     }
 
-    private void writeActivityListFile() {
+    //This method is set to public so that it can be called upon when log
+    //entries are added to write to and save the file...
+    public void writeActivityListFile() {
         FileOutputStream fos = null;
         ObjectOutputStream out = null;
         try {

@@ -48,7 +48,7 @@ public class UserAccountList {
     //This method creates 20 test users...
     private void createTestUserList() {
         for (int i = 0; i < 20; i++) {
-            accountList.add(new UserAccount("Test User" + i, "password"));
+            accountList.add(new UserAccount("User " + i, "password"));
         }
         System.out.println("Test UserList created");
         System.out.println("The UserList is: " + accountList);

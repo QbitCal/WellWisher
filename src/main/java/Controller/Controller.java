@@ -15,7 +15,6 @@ import java.time.LocalDate;
 import java.util.Collections;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JTable;
 import javax.swing.JTextArea;
 
 /**
@@ -25,48 +24,46 @@ import javax.swing.JTextArea;
  */
 public class Controller implements ActionListener {
     
-    //FIXME: This needs a username assignment to be given to it in the Constructor...
-    private static ActivityList activities = new ActivityList("User 1");
-    private static JFrame masterFrame = new JFrame();
-    private static JFrame login = new LoginUI();
-    private static ActivityUI activityManager = new ActivityUI();
-    private static JFrame addPhysical = new AddPhysicalActivity();
-    private static JFrame addSocial = new AddSocialActivity();
-    private static WeekLogUI weekLog;
-    private static UpdatePhysicalActivity updatePhysical;
-    private static UpdateSocialActivity updateSocial;
-    private static PhysicalActivity tempPhys;
-    private static SocialActivity tempSoc;
-    private static ActivityTableModel activityTable;
-    private static ActivityListUI activityList;
-    private static ActivityDetailUI activityDetail;
-    private static AddDetailPhysicalActivity detailPhysical = new AddDetailPhysicalActivity();
-    private static AddDetailSocialActivity detailSocial = new AddDetailSocialActivity();
-    private static PhysicalOrSocial physOrSoc = new PhysicalOrSocial();
-    private static int currentActivity = 0;
-    private static String currentUser;
+    private static ActivityList activities; //Activity list that handles logs.
+    private static JFrame masterFrame = new JFrame();//The frame set to visible.
+    private static JFrame login; //The login JFrame variable.
+    private static ActivityUI activityManager = new ActivityUI();//Main menu.
+    //These two JFrames add the two types of activity objects...
+    private static JFrame addPhysical = new AddPhysicalActivity();//Add Physical.
+    private static JFrame addSocial = new AddSocialActivity();//Add Social.
+    private static WeekLogUI weekLog;//The weekLog JFrame to individual entries.
+    private static UpdatePhysicalActivity updatePhysical;//Update entry JFrame.
+    private static UpdateSocialActivity updateSocial;//Update entry JFrame.
+    private static PhysicalActivity tempPhys;//Temporary Physical Activity.
+    private static SocialActivity tempSoc;//Temporary Social Activity.
+    private static ActivityTableModel activityTable;//Creates list view table.
+    private static ActivityListUI activityList;//Shows the list view.
+    private static ActivityDetailUI activityDetail;//Shows the detail view.
+    private static AddDetailPhysicalActivity detailPhysical 
+            = new AddDetailPhysicalActivity();//Adds entry from the detail view.
+    private static AddDetailSocialActivity detailSocial 
+            = new AddDetailSocialActivity();//Adds entry from the detail view.
+    private static PhysicalOrSocial physOrSoc 
+            = new PhysicalOrSocial();//Identifier for physical or social logs.
+    private static int currentActivity = 0;//Stores the current activity index.
+    private static String currentUser;//The username of the current user.
         
     //Constructor...
     public Controller (){
-        
-        
-        
-        //createTestActivities();//Create the activities for initial testing.
-        sortActivityLog(); //Sort the activity log entries.
-        weekLog = new WeekLogUI(activities);//Add the test entries.
-        activityTable = new ActivityTableModel(activities.getActivityList());
-        activityList = new ActivityListUI(activityTable);
-        //Initialize detail view with the first entry...
-        activityDetail = new ActivityDetailUI(activities.getActivityList(), 0);
-        addALButtons(); //Initialize button action listeners.
-        
-        //showLogin(); //Open the login screen.
-        
-        //Skip login and show activity manager for testing...
-        showActivityManager();
+        //Assign the login JFrame to a new LoginUI object 
+        //using this controller...
+        login = new LoginUI(this);
+        //Open the login screen (Required step to access other views)...
+        showLogin();
     }
-    
+
     //Getters and Setters...
+    public static String getCurrentUser() {
+        return currentUser;
+    }
+    public static void setCurrentUser(String currentUser) {    
+        Controller.currentUser = currentUser;
+    }
     public ActivityList getActivities() {
         return activities;
     }
@@ -85,6 +82,10 @@ public class Controller implements ActionListener {
     }
     public static void showActivityManager () {
         masterFrame.setVisible(false);
+        if (currentUser == null) {
+            System.out.println("username is not filled.");
+            currentUser = "NULL USER";
+        }
         masterFrame = activityManager;
         masterFrame.setVisible(true);
     }
@@ -140,107 +141,30 @@ public class Controller implements ActionListener {
         masterFrame = detailSocial;
         masterFrame.setVisible(true);
     }
-    
-    public static void addActivity(Activity act) {
-        activities.getActivityList().add(act);
+  
+  /**
+    * This method is used to initialize the data structures required for the 
+    * application's functionality upon login.
+    * 
+    * NOTE: Login is necessary to continue here. Activity logs require the 
+    * current user's username to progress in the application.
+    * 
+    */
+    public static void initStructs(){
+        activities = new ActivityList(currentUser);
+        sortActivityLog(); //Sort the activity log entries.
+        weekLog = new WeekLogUI(activities);//Add the test entries.
+        activityTable = new ActivityTableModel(activities.getActivityList());
+        activityList = new ActivityListUI(activityTable);
+        //Initialize detail view with the first entry...
+        activityDetail = new ActivityDetailUI(activities.getActivityList(), 0); 
     }
     
-    //Get the latest WeekLog from the list...
-    public static Activity getLatestWeekLog(ActivityList activities){
-        sortActivityLog();
-        Activity act = null;
-        try {
-            act = activities.getActivityList()
-                .get(activities.getActivityList().size() - 1);
-        }catch(IndexOutOfBoundsException e){
-            System.out.println("There are no current entries in the Week Log.");
-        }
-        return act;
-    }
-    
-    //This method simply uses the collected physical activity data to create and
-    //return a physical activity object...
-    //
-    //TODO: Validate input to make sure that the values entered are logical...
-    public static PhysicalActivity validatePhysicalActivity(int id, double timeLength,
-            int day, int month, int year, String description, String intensity,
-            int weight) throws Exception {
-        PhysicalActivity activity = new PhysicalActivity();
-
-        LocalDate date = LocalDate.of(year, month, day);
-        
-        activity = new PhysicalActivity(id, timeLength, date, description, intensity, weight);
-        
-        return activity;
-    }
-    
-    //This method simply uses the collected social activity data to create and
-    //return a social activity object...
-    //
-    //TODO: Validate input to make sure that the values entered are logical...
-    public static SocialActivity validateSocialActivity(int id, double timeLength,
-            int day, int month, int year, String description, String actType, 
-            String company) throws Exception {
-        SocialActivity activity = new SocialActivity();
-        
-        LocalDate date = LocalDate.of(year, month, day);
-        
-        activity = new SocialActivity(id, timeLength, date, description, actType, company);
-        
-        return activity;
-    }
-    
-    
-    //This method brings fortht the first activity log in the weeklog view...
-    public static void setFirstActivityLog(JTextArea bodyText, JLabel dateText){
-        sortActivityLog();
-        Activity act = activities.getActivityList().get(activities.getActivityList().size() - 1);
-        currentActivity = activities.getActivityList().size() - 1;
-        bodyText.setText(act.neatString());
-        dateText.setText(
-            act.getDate().getMonth() + " " +
-            act.getDate().getDayOfMonth() + ", " +
-            act.getDate().getYear() + " - " + act.getDate().getDayOfWeek());
-        setPageLocation();//Set the page location.
-
-    }
-    public static void parseActivityLog(Activity act) {
-        weekLog.getBodyText().setText(act.neatString());
-        weekLog.getDateText().setText(
-            act.getDate().getMonth() + " " +
-            act.getDate().getDayOfMonth() + ", " +
-            act.getDate().getYear() + " - " + act.getDate().getDayOfWeek());
-    }
-    
-    
-    //Create activities and add them to the activity list for testing...
-    public static void createTestActivities(){
-        
-        activities.getActivityList().add(new PhysicalActivity(11, 30.0
-                , LocalDate.of(2021, 9, 21)
-                , "Jogged outside.", "Moderate", 0 ));
-        activities.getActivityList().add(new PhysicalActivity(12, 25.0
-                , LocalDate.of(2021, 9, 13)
-                , "Lifted Weights.", "High", 50 ));
-        System.out.println("Created Default Physical activities.");
-        
-        activities.getActivityList().add(new SocialActivity(13, 60.0
-                , LocalDate.of(2021, 9, 30)
-                , "I went out for my lunch break", "Lunch"
-                , "Mike and Aaron"));
-        activities.getActivityList().add(new SocialActivity(14, 120.0
-                , LocalDate.of(2021, 9, 10)
-                , "I went out on Friday night", "Party"
-                , "Tom and Melissa"));
-        System.out.println("Created Default Social Activities.");
-    }
-
-    //This method is used to sort the activities arraylist to make sure that
-    //each time it is entered it is in order by date.
-    public static void sortActivityLog(){
-        Collections.sort(activities.getActivityList(), Activity.sortByDate());
-    }
-    
+  /**
+    * This method is used to add action listeners to each of the necessary 
+    * buttons throughout the application's various views.
+    * 
+    */
     public void addALButtons(){
         weekLog.btnPrevious.addActionListener(this);//Listen for btnPrevious.
         weekLog.btnNext.addActionListener(this);//Listen for btnNext.
@@ -252,11 +176,171 @@ public class Controller implements ActionListener {
         activityList.btnDone.addActionListener(this);//Listen for btnDone.
     }
     
-    //Use this method to update the page location identifier...
+  /**
+    * Accepts an Activity object and adds it to the controller's activity list.
+    * The newly updated list is then written back to the serialized file for
+    * the current user.
+    * 
+    *
+    * @param  act  an activity object to be added to the activity list.
+    */
+    public static void addActivity(Activity act) {
+        activities.getActivityList().add(act);
+        activities.writeActivityListFile();
+    }
+    
+  /**
+    * Accepts an ActivityList object and retrieves the latest week log entry
+    * from the list so that it can be presented to the user upon moving to the
+    * weekLogUI view.
+    * 
+    *
+    * @param  activities  an ActivityList to pull the most recent entry from.
+    * @return act         an Activity object with the most recent LocalDate value.
+    */
+    public static Activity getLatestWeekLog(ActivityList activities){
+        //First, make sure the list has been sorted.
+        sortActivityLog();
+        Activity act = null;
+        try {
+            act = activities.getActivityList()
+                .get(activities.getActivityList().size() - 1);
+        }catch(IndexOutOfBoundsException e){
+            System.out.println("There are no current entries in the Week Log.");
+        }
+        return act;
+    }
+    
+  /**
+    * This method uses the PhysicalActivity object collected from an entry form
+    * to create and return a PhysicalActivity object for the list.
+    * 
+    *
+    * @param  id            an int value for the activity's id.
+    * @param  timeLength    a double value for time spent doing the activity.
+    * @param  day           an int value for the day of the month (d or dd).
+    * @param  month         an int value for the month of the year (mm).
+    * @param  year          an int value for the year (yyyy).
+    * @param  description   a String for the activity description.
+    * @param  intensity     a String value for intensity taken from the list.
+    * @param  weight        an int value for the approx. weight lifted/used.
+    * 
+    * @throws Exception   an exception is thrown if values cannot be added.
+    * @return activity    an Activity object with the most recent LocalDate value.
+    */
+    public static PhysicalActivity validatePhysicalActivity(int id, double timeLength,
+            int day, int month, int year, String description, String intensity,
+            int weight) throws Exception {
+        PhysicalActivity activity = new PhysicalActivity();
+        LocalDate date = LocalDate.of(year, month, day);
+        activity = new PhysicalActivity(id, timeLength, date, description
+                , intensity, weight);
+        return activity;
+    }
+    
+  /**
+    * This method uses the SocialActivity object collected from an entry form
+    * to create and return a SocialActivity object for the list.
+    * 
+    *
+    * @param  id            an int value for the activity's id.
+    * @param  timeLength    a double value for time spent doing the activity.
+    * @param  day           an int value for the day of the month (d or dd).
+    * @param  month         an int value for the month of the year (mm).
+    * @param  year          an int value for the year (yyyy).
+    * @param  description   a String for the activity description.
+    * @param  actType       a String for the type of activity (Party, Lunch, etc.)
+    * @param  company       a String for the people there (Jack, Jill, etc.)
+    * 
+    * @throws Exception   an exception is thrown if values cannot be added.
+    * @return activity    an Activity object with the most recent LocalDate value.
+    */
+    public static SocialActivity validateSocialActivity(int id, double timeLength,
+            int day, int month, int year, String description, String actType, 
+            String company) throws Exception {
+        SocialActivity activity = new SocialActivity();
+        LocalDate date = LocalDate.of(year, month, day);
+        activity = new SocialActivity(id, timeLength, date, description
+                , actType, company);
+        return activity;
+    }
+    
+  /**
+    * Accesses the first activity log to be shown and populates the JLabel
+    * showing the date of the log and the JTextArea showing the description
+    * of the log entry.
+    * 
+    *
+    * @param  bodyText  the JTextArea to display the details of the entry.
+    * @param  dateText  the JLabel to display the date of the Activity log.
+    */
+    public static void setFirstActivityLog(JTextArea bodyText, JLabel dateText){
+        sortActivityLog();//Start by sorting the log.
+        Activity act = activities.getActivityList().get(activities.getActivityList().size() - 1);
+        currentActivity = activities.getActivityList().size() - 1;
+        bodyText.setText(act.neatString());
+        dateText.setText(
+            act.getDate().getMonth() + " " +
+            act.getDate().getDayOfMonth() + ", " +
+            act.getDate().getYear() + " - " + act.getDate().getDayOfWeek());
+        setPageLocation();//Set the page location.
+
+    }
+    
+  /**
+    * Displays the Activity log entry in the weekLogUI as a title showing the
+    * Activity's date and the Activity's details in the body text.
+    * 
+    * @param  act  the activity object to be parsed.
+    */
+    public static void parseActivityLog(Activity act) {
+        weekLog.getBodyText().setText(act.neatString());
+        weekLog.getDateText().setText(
+            act.getDate().getMonth() + " " +
+            act.getDate().getDayOfMonth() + ", " +
+            act.getDate().getYear() + " - " + act.getDate().getDayOfWeek());
+    }
+
+  /**
+    * This method is used to sort the activities ArrayList to order it by date.
+    * 
+    */
+    public static void sortActivityLog(){
+        Collections.sort(activities.getActivityList(), Activity.sortByDate());
+    }
+    
+    
+  /**
+    * This method is called by the LoginUI to give this controller access to
+    * the current user's username.
+    * 
+    * @param username A string value for the current user's username.
+    * 
+    */
+    public void assignCurrentUser(String username){
+        //Use this to assign the current user to 
+        this.currentUser = username;
+    }
+    
+  /**
+    * Updates the page location identifier based on the current activity and
+    * overall size of the Activity log list.
+    * 
+    */
     public static void setPageLocation () {   
         weekLog.getPageLocation().setText(
                 (currentActivity + 1) + " / " + activities.getActivityList().size());
     }
+    
+  /**
+    * Overrides the actionPerformed method of the ActionLister class to accept
+    * an ActionEvent object, get the source, and perform an action based on the
+    * source.
+    * 
+    * 
+    * @param e some action event of the WellWisher application.
+    * 
+    */
     @Override
     public void actionPerformed(ActionEvent e) {
         //Get the source of the action event...
@@ -289,7 +373,11 @@ public class Controller implements ActionListener {
             //The delete button removes the current entry and returns to 
             //the previous entry...
             else if (obj == weekLog.btnDelete){
+                    //Remove the activity...
                     activities.getActivityList().remove(activities.getActivityList().get(currentActivity));
+                    //Write the new activity list to the serialized file...
+                    activities.writeActivityListFile();
+                    
                     if (currentActivity != 0) {
                         currentActivity--;
                     } else {

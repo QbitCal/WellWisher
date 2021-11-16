@@ -1,23 +1,15 @@
 package Model;
 
 import WellWisher.Printable;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import java.io.Serializable;
 import java.time.LocalDate;
-import java.util.Collections;
 import java.util.Comparator;
 
 /**
  * The class used to create activities to be stored in the WeekLog.
- * 
- * REFERENCE THIS FOR POLYMORPHIC JSON SERIALIZATION AND DESERIALIZATION WITH
- * GSON: 
- * 
- * https://jansipke.nl/serialize-and-deserialize-a-list-of-polymorphic-objects-with-gson/
  *
  * @author Quenten Calvano
- * @version 10/17/2021
+ * @version 11/13/2021
  */
 
 
@@ -28,8 +20,7 @@ public class Activity implements Printable, Serializable {
     private Double timeLength; //The time length in minutes spent on the activity.
     private LocalDate date; //The date the activity was performed on.
     private String description; //What the activity involved or other notes.
-    //private WellWisher.ActivityType activityType; //What type of activity this is.
-    private boolean physical;
+    private boolean physical; //Returns whether or not the object is Physical.
 
     //Constructors...
     public Activity (int activityID, Double timeLength, LocalDate date,
@@ -38,16 +29,12 @@ public class Activity implements Printable, Serializable {
         this.timeLength = timeLength;
         this.date = date;
         this.description = description;
-        //this.activityType = activityType;
-
     }
-    public Activity () {
-
-    } //For entering data using setters...
     
-    public boolean isPhysical() {
-        return physical;
+    //Constructor for entering data using setters...
+    public Activity () {
     }
+    
     //Setters and Getters...
     public void setActivityID(int activityID) {
         this.activityID = activityID;
@@ -73,12 +60,28 @@ public class Activity implements Printable, Serializable {
     public String getDescription() {
         return description;
     }
+    public boolean isPhysical() {
+        return physical;
+    }
 
+  /**
+    * Creates a comparator for the Activity objects in which activities are 
+    * sorted by checking one activity's LocalDate value to that of another.
+    * 
+    *
+    * @return actSorter  an Activity object comparator for sorting by date.
+    */
     public static Comparator<Activity> sortByDate (){
         Comparator<Activity> actSorter = (Activity act1, Activity act2) -> act1.getDate().compareTo(act2.getDate());
         return actSorter;
     }
-    //This method prints each attribute value for the object into a string.
+    
+  /**
+    * Overrides the toString method allowing for better formatting of the
+    * Activity class.
+    * 
+    * @return a string value of the Activity object's contents.
+    */
     @Override
     public String toString() {
         return "Activity{" +
@@ -91,22 +94,42 @@ public class Activity implements Printable, Serializable {
                 +
                 '}';
     }
-    //This method prints the activity type if it has not been specified...
+    
+  /**
+    * Prints descriptive output to the console if the activity type has not
+    * been specified...
+    * 
+    */
     public void printActivityType(){
         System.out.println("Unspecified Activity Type");
     }
-    //This method prints the string that results from the toString Method of this class...
+    
+  /**
+    * Prints the contents of the Activity class's toString() method to the 
+    * console.
+    * 
+    */
     @Override
     public void print() {
         System.out.println(this.toString());
     }
-
-    //This method prints the description and notifies the user of the object being described...
+  /**
+    * This method prints the Activity's description and notifies the user of 
+    * the object being described.
+    * 
+    */
     @Override
     public void printDescription() {
         System.out.println("Activity Description: " + this.getDescription());
 
     }
+  /**
+    * This method returns an empty string when called. 
+    * 
+    * (The neatString() method returns a string of an object's details if the 
+    * object is a Physical or Social Activity.)
+    * 
+    */
     public String neatString(){
         return "";
     }
